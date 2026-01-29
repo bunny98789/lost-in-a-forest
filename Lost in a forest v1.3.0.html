@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+
+<style id="webmakerstyle">
+body {
+  background-color: #222222;
+  color: white;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  transition: opacity 0.5s ease;
+}
+
+.hidden {
+  display: none;
+}
+
+.menu-btn {
+  background-color: cyan;
+  border: none;
+  color: black;
+  padding: 12px 30px;
+  margin: 10px 0;
+  font-size: 1.25rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.menu-btn:hover {
+  background-color: #00bfbf;
+  transform: scale(1.05);
+}
+
+.version-label {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.group {
+  width: 90%;
+  max-width: 600px;
+  margin: 10px auto;
+  text-align: center;
+}
+
+/* Displays stacked vertically */
+#displays {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+/* Main buttons side by side with spacing */
+#mainButtons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+/* Craft menu buttons side by side */
+#craftMenu {
+  padding: 0 15px;
+  overflow-x: auto;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+
+
+#craftMenu button {
+  height: auto;        /* make sure buttons don't get forced taller */
+  flex-shrink: 0;      /* prevent buttons from shrinking too much */
+}
+
+/* Inventory is just centered text */
+#inventoryGroup {
+  margin-bottom: 20px;
+}
+
+/* Animals in a row */
+#animalsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+#spellMenu {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+/* Buttons style (optional cleanup) */
+.bttn, .Citem, .Sitem {
+  background-color: cyan;
+  border: none;
+  color: black;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.bttn:hover, .Citem:hover {
+  background-color: #00bfbf;
+  transform: scale(1.05);
+}
+
+.Btxt {
+  scale: 0.9;
+}
+
+.Ctxt {
+  margin: 30px;
+}
+
+#desc {
+  position: fixed;
+  max-width: 260px;
+  padding: 6px 10px;
+
+  font-size: 0.85rem;
+  color: #ccc;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid #444;
+  border-radius: 6px;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+
+  pointer-events: none;
+  z-index: 20;
+
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+#desc.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+.Sitem {
+  position: fixed;
+  left: 50%;
+  transform: translatex(-50%);
+}
+
+
+.Sitem:hover {
+  background-color: #00bfbf;
+  transform: translatex(-50%) scale(1.05);
+}
+
+.craftCatBtn {
+   color: #00FFFF;           /* bright cyan text */
+  background-color: transparent;  /* no background or a subtle one */
+  font-weight: bold;
+  padding: 5px 10px;
+  border: 2px solid #00FFFF; /* cyan border */
+  border-radius: 4px;
+  cursor: pointer;          /* shows pointer on hover */
+  transition: background-color 0.3s, color 0.3s;
+  user-select: none;        /* prevent text selection on click */
+}
+
+.craftCatBtn:hover {
+  background-color: #00FFFF; /* cyan background on hover */
+  color: #000000;            /* black text on hover for contrast */
+  box-shadow: 0 0 8px #00FFFF; /* subtle glow effect */
+}
+
+.craftCatBtn[disabled] {
+  cursor: not-allowed;
+    color: #888888; /* a darker grey */
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.3); /* light transparent background */
+  padding: 5px 10px;
+  border-radius: 4px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.stxt {
+  position: fixed;
+  top: 10px;
+  left: 55px;
+}
+
+#damage {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: 45px;
+}
+
+.blinded {
+  filter: blur(3px) brightness(0.8);
+}
+
+.companion-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.companion-hp {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: #400;
+  border: 1px solid #000;
+}
+
+.companion-hp-inner {
+  height: 100%;
+  width: 100%;
+  background: #0f0;
+}
+
+</style>
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lost in a forest</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- Title Screen -->
+<div id="titleScreen" class="screen">
+  <h1>Lost in a forest</h1>
+  <button id="playBtn" class="menu-btn">Play</button>
+  <button id="changelogBtn" class="menu-btn">Changelog</button>
+   <button id="controlsBtn" class="menu-btn">Controls</button>
+  <div class="version-label">Version 1.3.0</div>
+</div>
+
+<div id="changelogScreen" class="screen hidden">
+  <h2>Changelog</h2>
+  <div id="changelogContent">
+    <p class="Ctxt"><strong>1.0.0 (2025-1-24)</strong>: Initial Release</p>
+    <p class="Ctxt"><strong>1.1.0 (2026-1-24)</strong>: Changed the eating system</p>
+    <p class="Ctxt"><strong>1.1.1 (2026-1-24)</strong>: fixed no button glitch</p>
+    <p class="Btxt"><strong>1.2.0 (2026-1-26)</strong>: added healing, changed crafting system layout, and added bosses that can be summoned, changed the recipe for the spear so now it needs string as well, and made it so the game doesn't spawn things in while in the menu, also there are now spells ( 1 of which is needed to get to the first boss)</p>
+    <p class="Btxt"><strong>1.2.1 (2026-1-26)</strong>: fixed anti-cheat system</p>
+     <p class="Btxt"><strong>1.3.0 (2026-1-28)</strong>: fixed boss battle, added lore, added in [mobName here] and added in new items to go with the new [mobName here], added crafting categories, also there is a new second boss along with a new weapon, and there is also a damage display now, and there is no a special display when you hover over crafting buttons, added in heart</p>
+  </div>
+  <button id="backFromChangelog" class="menu-btn">Back</button>
+</div>
+  
+  <!-- CONTROLS SCREEN -->
+  <div id="controlsScreen" class="screen hidden">
+  <h2>Controls</h2>
+  <div id="controlsContent">
+    <p class="Ctxt"><strong>Right click</strong>: Tames wolf (requires meat)</p>
+    <p class="Ctxt"><strong>Left click</strong>: Clicks buttons and attacks creatures</p>
+    <p class="Ctxt"><strong>NOTE</strong>: When the dog flashes white, it means he dealth damage, red means he took damage, this will most likely be changed in the future</p>
+     <p class="Ctxt"><strong>MORE COMING SOON</strong></p>
+  </div>
+  <button id="backFromControlScreen" class="menu-btn">Back</button>
+</div>
+  
+<!-- Game Screen -->
+<div id="gameScreen" class="screen hidden">
+
+  <audio id="Intro1" src="https://files.catbox.moe/04qsqo.mp3"></audio>
+  <audio id="Intro2" src="https://files.catbox.moe/ka8uok.mp3"></audio>
+  <audio id="Intro3" src="https://files.catbox.moe/pr98xq.mp3"></audio>
+  <audio id="ClickOff" src="https://files.catbox.moe/2pbex5.mp3"></audio>
+  <audio id="madDragon" src="https://files.catbox.moe/pxove5.5&guidanceScale=5"></audio>
+  
+  <!-- Displays Group -->
+  <div id="displays" class="group">
+    <h3 id="food" class="txt">Hunger: N/A</h3>
+    <h3 id="health" class="txt">Health: N/A</h3>
+    <h4 id="damageDisplay" class="stxt">Damage: N/A</h4>
+    <img id="damage" src="https://files.catbox.moe/p3dikt.png">
+  </div>
+
+  <!-- Main Buttons Group -->
+  <div id="mainButtons" class="group">
+    <button id="explore" class="bttn">Explore</button>
+    <button id="eat" class="bttn">Eat</button>
+    <button id="craft" class="bttn">Craft</button>
+    <button id="heal" class="bttn">Heal</button>
+  </div>
+
+  <!-- Crafting Categories -->
+<div id="craftCategories" style="display: none; margin-top:10px; margin-bottom:5px;">
+  <button class="craftCatBtn" data-cat="all">All</button>
+  <button class="craftCatBtn" data-cat="essential">Essential</button>
+  <button class="craftCatBtn" data-cat="weapon">Weapons</button>
+  <button class="craftCatBtn" data-cat="food">Food</button>
+  <button class="craftCatBtn" data-cat="medical">Medical</button>
+  <button class="craftCatBtn" data-cat="buildings" disabled style="color:grey; cursor:not-allowed;">Buildings (Coming Soon)</button>
+</div>
+  
+  <!-- Craft Menu Group -->
+  <div id="craftMenu" class="group" style="display:none; margin-top:10px;">
+      <p id="desc"></p>
+  <button id="craftSpear" class="Citem weapon">Craft Spear</button>
+  <button id="craftDagger" class="Citem weapon">Craft Dagger</button>
+  <button id="craftRope" class="Citem essential">Craft Rope</button>
+  <button id="craftBandage" class="Citem medical">Craft Bandage</button>
+  <button id="craftMedkit" class="Citem medical">Craft Medkit</button>
+  <button id="craftCloth" class="Citem essential">Craft Cloth</button>
+  <button id="craftAlcohol" class="Citem food">Make Alcohol</button>
+  <button id="craftPatch" class="Citem medical">Make Patch</button>
+  <button id="craftRusticStew" class="Citem food">Make Rustic Stew</button>
+  <button id="craftDarkOrb" class="Citem essential">Make a Dark Orb</button>
+    <button id="craftFluffSword" class="Citem weapon">Make a Fluff Sword</button>
+     <button id="craftHeart" class="Citem medical">Make a Heart</button>
+</div>
+
+  <!-- Inventory Group -->
+  <div id="inventoryGroup" class="group">
+    <h1 class="txt">Inventory</h1>
+    <p id="Items" class="txt">Inventory empty, explore for materials</p>
+  </div>
+
+  <!-- Animals Group -->
+  <div id="animalsContainer" class="group"></div>
+  
+  <!-- Bosses Group -->
+  <div id="bossesContainer" class="group"></div>
+
+  <!-- Spell Group -->
+  <button id="spellBtn" class="bttn">Spells</button>
+
+<div id="spellMenu" class="group" style="display:none;">
+  <button id="crystalSpellBtn" class="Sitem">
+    Perform Crystal Spell
+  </button>
+</div>
+  
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
+
+
+<script>const isInIframe = window.self !== window.top;
+
+// --- Title Screen Elements ---
+const titleScreen = document.getElementById("titleScreen");
+const changelogScreen = document.getElementById("changelogScreen");
+const gameScreen = document.getElementById("gameScreen");
+const controlsScreen = document.getElementById("controlsScreen");
+
+const playBtn = document.getElementById("playBtn");
+const changelogBtn = document.getElementById("changelogBtn");
+const backFromChangelog = document.getElementById("backFromChangelog");
+const backFromControlScreen = document.getElementById("backFromControlScreen");
+const ControlsBtn = document.getElementById("controlsBtn");
+
+// --- Audio Elements ---
+const Intro1 = document.getElementById("Intro1");
+const Intro2 = document.getElementById("Intro2");
+const Intro3 = document.getElementById("Intro3");
+const ClickOff = document.getElementById("ClickOff");
+
+const madDragon = document.getElementById("madDragon");
+
+// --- Game UI Elements ---
+const foodDisplay = document.getElementById("food");
+const healthDisplay = document.getElementById("health");
+const damageDisplay = document.getElementById("damageDisplay");
+const inventoryDisplay = document.getElementById("Items");
+const desc = document.getElementById("desc");
+
+const exploreBttn = document.getElementById("explore");
+const eatBttn = document.getElementById("eat");
+const healBttn = document.getElementById("heal");
+
+const craftBttn = document.getElementById("craft");
+const craftMenu = document.getElementById("craftMenu");
+
+const craftSpearBtn = document.getElementById("craftSpear");
+const craftDaggerBtn = document.getElementById("craftDagger");
+const craftRopeBtn = document.getElementById("craftRope");
+const craftBandageBtn = document.getElementById("craftBandage");
+const craftMedkitBtn = document.getElementById("craftMedkit");
+const craftClothBtn = document.getElementById("craftCloth");
+const craftAlcoholBtn = document.getElementById("craftAlcohol");
+const craftRusticStewBtn = document.getElementById("craftRusticStew");
+const craftPatchBtn = document.getElementById("craftPatch");
+const craftDarkOrbBtn = document.getElementById("craftDarkOrb");
+const craftHeartBtn = document.getElementById("craftHeart");
+const craftFluffSwordBtn = document.getElementById("craftFluffSword");
+
+const spellBtn = document.getElementById("spellBtn");
+const spellMenu = document.getElementById("spellMenu");
+const crystalSpellBtn = document.getElementById("crystalSpellBtn");
+
+// --- Admin Varibles ---
+let testingMode = false;
+let password = 3092;
+
+// --- Game Varibles ---
+let menuOpened = true; 
+let gameStartTime = null;
+
+// --- Player Stats ---
+let hunger = 100;
+let maxhealth = 100;
+let health = 100;
+let damage = 1;
+
+// --- Taming ---
+let companion = null;
+
+// --- Animal Spawning ---
+let animalSpawning = false;
+const activeAnimals = [];
+let currentAnimals = 0;
+const maxAnimals = 3;
+let animalsKilled = 0;
+
+// --- Boss Spawning
+let bossTimer = 60;
+const activeBosses = [];
+let boss1defeated = false;
+
+// --- Inventory ---
+const Inventory = {
+  wood: 0,
+  stone: 0,
+  meat: 0,
+  pork: 0,
+  beef: 0,
+  spear: 0,
+  fang: 0,
+  dagger: 0,
+  string: 0,
+  rope: 0,
+  medkit: 0,
+  darkMagicEssence: 0,
+  cloth: 0,
+  alcohol: 0,
+  crystal: 0,
+  patch: 0,
+  rusticStew: 0,
+  darkOrb: 0,
+  dragonWing: 0,
+  devourerScale: 0,
+  flesh: 0,
+  feather: 0,
+  fluffSword: 0,
+  heart: 0,
+};
+
+// --- Food Data ---
+const food = [
+  { name: "meat", restoration: 3 },
+  { name: "pork", restoration: 5 },
+  { name: "beef", restoration: 10 },
+  { name: "alcohol", restoration: 2},
+  { name: "rusticStew", restoration: 100},
+  { name: "flesh", restoration: 5}
+];
+
+// --- Items ---
+const items = [
+  { name: "wood", chance: 40 },
+  { name: "meat", chance: 30 },
+  { name: "stone", chance: 20 },
+  { name: "string", chance: 10 },
+];
+// --- Weapons ---
+const weapons = [
+  { name: "spear", DamageBonus: 2 },
+  { name: "dagger", DamageBonus: 1 },
+  { name: "fluffSword", DamageBonus: 5},
+];
+
+// --- Animals ---
+const animals = [
+  { name: "cow", health: 10, damage: 0, drop: "beef", amount: 1, src: "https://files.catbox.moe/ucic8a.png" },
+  { name: "pig", health: 5, damage: 0, drop: "pork", amount: 1, src: "https://files.catbox.moe/7dg6z3.png" },
+  { name: "wolf", health: 7, damage: 1, drop: "fang", amount: 1, src: "https://files.catbox.moe/xzg5vf.png" },
+  { name: "bear", health: 25, damage: 3, drop: "fang", amount: 3, src: "https://files.catbox.moe/0ds6h5.png" },
+   { name: "Dark Fairy", health: 50, damage: 5, drop: "darkMagicEssence", amount: 1, src: "https://files.catbox.moe/01y98x.gif" },
+   { name: "Chicken", health: 3, damage: 0, drop: "feather", amount: 2, src: "https://files.catbox.moe/h6i6yt.png" },
+];
+
+// 3 specials, fly, invis, beam
+const bosses = [
+  { name: "eyed dragon", health: 100, damage: 20, special: "fly", drop1: "beef", amount1: 20, drop2: "fang", amount2: 20, drop3: "dragonWing", amount3: 1, src: "https://files.catbox.moe/qrabn0.png"},
+   { name: "devourer", health: 250, damage: 30, special: "beam", drop1: "fang", amount1: 20, drop2: "flesh", amount2: 30, drop3: "devourerScale", amount3: 1, src: "https://files.catbox.moe/4x6k3d.png"},
+]
+
+// --- Recipes ---
+const recipes = [
+  { name: "spear", cost: { wood: 2, stone: 1, string: 1 } },
+  { name: "dagger", cost: { wood: 1, fang: 3 } },
+  { name: "rope", cost: { string: 5 } },
+  { name: "bandage", cost: { string: 2, alcohol: 1} },
+  { name: "patch", cost: { cloth: 2,} },
+  { name: "medkit", cost: { cloth: 3, string: 2, alcohol: 1, } },
+  { name: "cloth", cost: { string: 3} },
+  { name: "alcohol", cost: { meat: 3, beef: 1} },
+  { name: "rusticStew", cost: { beef: 4, pork: 4, meat: 4, alcohol: 2} },
+  { name: "darkOrb", cost: {crystal: 1, darkMagicEssence: 1} },
+   { name: "fluffSword", cost: {stone: 6, feather: 4, wood: 20, rope: 1} },
+   { name: "heart", cost: {stone: 50, feather: 10, crystal: 2, medkit: 3} },
+];
+
+const healing = [
+  { name: "patch", amount: 25},
+  { name: "bandage", amount: 15},
+  { name: "medkit", amount: 100},
+  { name: "heart", amount: 100},
+]
+
+function formatItemName(key) {
+  return key
+    .replace(/([A-Z])/g, " $1") // add space before capitals
+    .replace(/^./, c => c.toUpperCase()); // capitalize first letter
+}
+
+// --- Show/Hide Screens ---
+function showScreen(screenToShow) {
+  [titleScreen, changelogScreen, gameScreen, controlsScreen].forEach(screen => screen.classList.add("hidden"));
+  screenToShow.classList.remove("hidden");
+}
+
+// --- Update UI Displays ---
+function updateAllDisplays() {
+  foodDisplay.innerText = `Hunger: ${hunger}`;
+  healthDisplay.innerText = `Health: ${health}`;
+  damageDisplay.innerText = `Damage: ${damage}`;
+
+  
+  let inventoryText = "";
+
+for (let item in Inventory) {
+  if (Inventory[item] > 0) {
+    inventoryText += `${formatItemName(item)}: ${Inventory[item]}<br>`;
+  }
+}
+
+document.getElementById("Items").innerHTML = inventoryText || "Inventory empty, explore for materials";
+
+
+  if (health <= 0) {
+    alert("Game over 💀");
+    restartGame();
+  }
+}
+
+function restartGame() {
+  hunger = 100;
+  health = 100;
+
+  for (const animal of activeAnimals) {
+    animal.img.remove();
+    clearInterval(animal.intervalId);
+  }
+  activeAnimals.length = 0;
+  currentAnimals = 0;
+  
+  for (const animal of activeBosses) {
+    animal.img.remove();
+    clearInterval(animal.intervalId);
+  }
+  activeBosses.length = 0;
+
+  for (let i in Inventory) Inventory[i] = 0;
+
+  updateAllDisplays();
+
+  stopSpawning();
+
+  gameStartTime = Date.now(); // reset start time on restart
+
+  startSpawning();
+}
+
+// --- Get Random Item ---
+function getRandomItem() {
+  const total = items.reduce((s, i) => s + i.chance, 0);
+  let roll = Math.random() * total;
+
+  for (let i of items) {
+    if (roll < i.chance) return i.name;
+    roll -= i.chance;
+  }
+}
+
+// --- Crafting Function ---
+function craftItem(recipeName) {
+  const recipe = recipes.find(r => r.name === recipeName);
+  if (!recipe) {
+    alert("Recipe not found!");
+    return;
+  }
+
+  // Check if player has enough materials
+  for (const material in recipe.cost) {
+    if (!Inventory[material] || Inventory[material] < recipe.cost[material]) {
+      alert(`Not enough ${material}!`);
+      return;
+    }
+  }
+
+  // Deduct materials
+  for (const material in recipe.cost) {
+    Inventory[material] -= recipe.cost[material];
+  }
+
+  // Add crafted item
+  Inventory[recipe.name] = (Inventory[recipe.name] || 0) + 1;
+
+  // Increase damage if weapon
+  const weapon = weapons.find(w => w.name === recipe.name);
+  if (weapon) {
+    damage += weapon.DamageBonus;
+  }
+
+ alert(`You crafted a ${formatItemName(recipe.name)}!`);
+  updateAllDisplays();
+}
+
+//Boss 2 spawn
+function checkKilledAnimals() {
+  if (animalsKilled >= 100 && boss1defeated === true) {
+    animalsKilled = 0;
+    alert("the forest feels the blood of the creatures you killed as it dries on the leafy ground, let it now send it's strongest warrior after you...");
+    alert("THE DEVOURER");
+    alert("it will arrive in 60 secs, prepare as best you can");
+    let boss2interval = setInterval(() => {
+     bossTimer--;
+      
+      if (bossTimer <= 0) {
+        spawnBoss(1); // devourer
+        clearInterval(boss2interval);
+      }
+    }, 1000);
+  }
+}
+
+// --- Spawn Animals ---
+// --- Spawn Animals ---
+function spawnAnimal(id) {
+  if (currentAnimals >= maxAnimals) return;
+  currentAnimals++;
+
+  const a = animals[id];
+  let hp = a.health;
+  let isAlive = true;
+
+  const animalsContainer = document.getElementById("animalsContainer");
+
+  // --- Create wrapper for ALL animals (prevents DOM errors) ---
+  const wrapper = document.createElement("div");
+  wrapper.style.display = "inline-block";
+  wrapper.style.position = "relative";
+
+  const img = document.createElement("img");
+  img.src = a.src;
+  img.style.width = "100px";
+  img.style.imageRendering = "pixelated";
+  img.style.display = "block";
+
+  wrapper.appendChild(img);
+  animalsContainer.appendChild(wrapper);
+
+  // --- DAMAGE INTERVAL (enemy attacks player or dog) ---
+  const damageInterval = setInterval(() => {
+    if (!isAlive) return;
+
+    if (companion && img !== companion.img) {
+  companion.hp -= a.damage;
+
+  // Companion takes damage flicker
+  companion.img.style.filter = "brightness(0.6) saturate(5)";
+  setTimeout(() => companion.img.style.filter = "none", 120);
+
+  // Update HP bar
+  companion.hpInner.style.width =
+    Math.max(0, (companion.hp / companion.maxHp) * 100) + "%";
+
+  if (companion.hp <= 0) {
+    alert("Your dog was defeated protecting you 💔");
+    companion.wrapper.remove();
+    companion = null;
+  }
+} else {
+  health -= a.damage;
+}
+
+    updateAllDisplays();
+  }, 1000);
+
+  // --- TAME WOLF (RIGHT CLICK) ---
+  wrapper.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+
+  if (a.name !== "wolf") return;
+  if (companion) return alert("You already have a companion.");
+  if (Inventory.meat < 5) return alert("Not enough meat.");
+
+  Inventory.meat -= 5;
+  clearInterval(damageInterval);
+
+  img.src = "https://files.catbox.moe/yc20jp.png";
+
+  const hpBar = document.createElement("div");
+  hpBar.className = "companion-hp";
+
+  const hpInner = document.createElement("div");
+  hpInner.className = "companion-hp-inner";
+  hpBar.appendChild(hpInner);
+  wrapper.appendChild(hpBar);
+
+  companion = {
+    img,
+    wrapper,
+    hp: 40,
+    maxHp: 40,
+    damage: 2,
+    hpInner
+  };
+
+  alert("You tamed the wolf. It will protect you.");
+  updateAllDisplays();
+});
+
+  // --- COMPANION ATTACK LOOP ---
+  const companionAttack = setInterval(() => {
+   if (!companion || !isAlive || img === companion.img) return;
+
+
+    // Companion attack flicker
+    companion.img.style.filter = "brightness(1.8)";
+    setTimeout(() => companion.img.style.filter = "none", 100);
+
+    hp -= companion.damage;
+
+    if (hp <= 0) {
+      isAlive = false;
+      wrapper.remove();
+      clearInterval(damageInterval);
+      clearInterval(companionAttack);
+
+      currentAnimals--;
+      animalsKilled++;
+      checkKilledAnimals();
+
+      Inventory[a.drop] += a.amount;
+      updateAllDisplays();
+    }
+  }, 1500);
+
+  // --- PLAYER ATTACK ---
+  img.onclick = () => {
+    if (!isAlive) return;
+
+    img.style.filter = "brightness(0.5) saturate(5)";
+    hp -= damage;
+
+    if (hp <= 0) {
+      isAlive = false;
+      wrapper.remove();
+      clearInterval(damageInterval);
+      clearInterval(companionAttack);
+
+      currentAnimals--;
+      animalsKilled++;
+      checkKilledAnimals();
+
+      Inventory[a.drop] += a.amount;
+      updateAllDisplays();
+    } else {
+      setTimeout(() => (img.style.filter = "none"), 150);
+    }
+  };
+
+  activeAnimals.push({ img, intervalId: damageInterval });
+}
+
+// --- Spawn Bosses ---
+function spawnBoss(id) {
+  let playerBlinded = false;
+  const bossSize = 100;
+  const padding = 20;
+
+  const maxX = window.innerWidth - bossSize - padding;
+  const maxY = window.innerHeight - bossSize - padding;
+
+  const a = bosses[id];
+  let hp = a.health;
+
+  const img = document.createElement("img");
+  img.src = a.src;
+  img.style.width = "100px";
+  img.style.position = "absolute";
+  img.style.imageRendering = "pixelated";
+
+  const bossesContainer = document.getElementById("bossesContainer");
+  bossesContainer.appendChild(img);
+
+  let canAttack = true;
+  let beamInterval = null;
+
+  // --- FLY SPECIAL ---
+  function flyCycle() {
+    if (hp <= 0) return;
+
+    canAttack = false;
+
+    const x = Math.random() * maxX;
+    const y = Math.random() * maxY;
+
+    img.style.transition = "none";
+    img.getBoundingClientRect();
+
+    img.style.transition = "left 2s linear, top 2s linear";
+    img.style.left = `${x}px`;
+    img.style.top = `${y}px`;
+
+    setTimeout(() => {
+      if (hp <= 0) return;
+      canAttack = true;
+      setTimeout(flyCycle, 3000);
+    }, 5000);
+  }
+
+  // --- BEAM SPECIAL ---
+  function beam() {
+    if (hp <= 0 || playerBlinded) return;
+
+    const beamEl = document.createElement("div");
+    beamEl.className = "boss-beam";
+    bossesContainer.appendChild(beamEl);
+
+    function updateBeam() {
+      const rect = img.getBoundingClientRect();
+      beamEl.style.left = rect.left + rect.width / 2 - 6 + "px";
+      beamEl.style.top = rect.top - 120 + "px";
+    }
+
+    updateBeam();
+    const follow = setInterval(updateBeam, 50);
+
+    playerBlinded = true;
+    document.body.classList.add("blinded");
+
+    setTimeout(() => {
+      clearInterval(follow);
+      beamEl.remove();
+      playerBlinded = false;
+      document.body.classList.remove("blinded");
+    }, 3000);
+  }
+
+  // Trigger specials
+  if (a.special === "fly") flyCycle();
+  if (a.special === "beam") {
+    beamInterval = setInterval(beam, 12000);
+  }
+
+  // --- DAMAGE LOOP ---
+  const damageInterval = setInterval(() => {
+    if (canAttack) {
+      health -= a.damage;
+      updateAllDisplays();
+    }
+  }, 1000);
+
+  activeBosses.push({ img, intervalId: damageInterval });
+
+  // --- CLICK ATTACK ---
+  img.onclick = () => {
+    if (playerBlinded && Math.random() < 0.6) {
+      damageDisplay.innerText = "Miss!";
+      return;
+    }
+
+    img.style.filter = "brightness(0.5) saturate(5)";
+    hp -= damage;
+
+    if (hp <= 0) {
+      img.remove();
+      clearInterval(damageInterval);
+      if (beamInterval) clearInterval(beamInterval);
+      playerBlinded = false;
+      document.body.classList.remove("blinded");
+
+      if (a.name === "eyed dragon") boss1defeated = true;
+
+      Inventory[a.drop1] += a.amount1;
+      Inventory[a.drop2] += a.amount2;
+      Inventory[a.drop3] += a.amount3;
+      updateAllDisplays();
+    } else {
+      setTimeout(() => (img.style.filter = "none"), 150);
+    }
+  };
+}
+
+// --- Spawning Control ---
+let spawnTimeoutId;
+
+function startSpawning() {
+  const delay = Math.floor(Math.random() * (60000 - 5000)) + 5000; // 5s to 60s
+  spawnTimeoutId = setTimeout(() => {
+    // Calculate how many ms have passed since game started
+    const elapsed = Date.now() - gameStartTime;
+
+    // Filter animals allowed to spawn
+    let spawnableAnimals;
+
+    if (elapsed < 60000) {  // less than 1 minute
+      spawnableAnimals = animals.filter(a => a.name !== "Dark Fairy");
+    } else {
+      spawnableAnimals = animals;
+    }
+
+    // Pick a random animal from allowed list
+    const animalToSpawn = spawnableAnimals[Math.floor(Math.random() * spawnableAnimals.length)];
+    const animalIndex = animals.indexOf(animalToSpawn);
+
+    spawnAnimal(animalIndex);
+
+    if (animalSpawning) startSpawning();
+  }, delay);
+}
+
+function stopSpawning() {
+  if (spawnTimeoutId) {
+    clearTimeout(spawnTimeoutId);
+    spawnTimeoutId = null;
+  }
+}
+
+// --- Button Listeners ---
+// Title screen buttons
+playBtn.addEventListener("click", () => {
+  Intro1.play();
+  
+  Intro1.addEventListener("ended", () => {
+    Intro2.play();
+  });
+  
+  Intro2.addEventListener("ended", () => {
+    ClickOff.play();
+  });
+  
+  ClickOff.addEventListener("ended", () => {
+    Intro3.play();
+  });
+  
+  menuOpened = false;
+  showScreen(gameScreen);
+  startSpawning();
+  updateAllDisplays();
+  
+  gameStartTime = Date.now();
+});
+
+changelogBtn.addEventListener("click", () => {
+  showScreen(changelogScreen);
+});
+
+ControlsBtn.addEventListener("click", () => {
+  showScreen(controlsScreen);
+});
+
+backFromChangelog.addEventListener("click", () => {
+  showScreen(titleScreen);
+});
+
+backFromControlScreen.addEventListener("click", () => {
+  showScreen(titleScreen);
+});
+
+// Game buttons
+exploreBttn.addEventListener("click", () => {
+  const found = getRandomItem();
+  Inventory[found]++;
+  alert(`You found ${found}`);
+  updateAllDisplays();
+});
+
+eatBttn.addEventListener("click", () => {
+  if (hunger >= 100) {
+    alert("You're already full");
+    return;
+  }
+
+  const availableFood = food.filter(f => Inventory[f.name] > 0);
+  if (availableFood.length === 0) {
+    alert("You have no food!");
+    return;
+  }
+
+  let msg = "Type the name of the food you want to eat:\n\n";
+  availableFood.forEach(f => {
+    msg += `${f.name} (+${f.restoration}) x${Inventory[f.name]}\n`;
+  });
+
+  const input = prompt(msg);
+  if (!input) return;
+
+  const foodName = input.trim().toLowerCase();
+  const chosen = availableFood.find(f => f.name === foodName);
+
+  if (!chosen) {
+    alert("That food doesn't exist or you don't have it.");
+    return;
+  }
+  
+  if (chosen.name === "flesh") {
+    health -= 10;
+    alert("the flesh seems harmful");
+  }
+
+  Inventory[chosen.name]--;
+  hunger = Math.min(100, hunger + chosen.restoration);
+
+  updateAllDisplays();
+});
+
+healBttn.addEventListener("click", () => {
+  // Check if player is already at max health
+  if (health >= maxhealth) {
+    alert("You're already healthy");
+    return;
+  }
+
+  // Check if player has any healing items
+  const availableHealing = healing.filter(h => Inventory[h.name] > 0);
+  if (availableHealing.length === 0) {
+    alert("You have nothing to heal with!");
+    return;
+  }
+
+  // Ask player which healing item to use
+  let msg = "Type the name of the healing product you want to use:\n\n";
+  availableHealing.forEach(h => {
+    msg += `${h.name} (+${h.amount}) x${Inventory[h.name]}\n`;
+  });
+
+  const input = prompt(msg);
+  if (!input) return;
+
+  const productName = input.trim().toLowerCase();
+  const chosen = availableHealing.find(h => h.name === productName);
+
+  if (!chosen) {
+    alert("That health product doesn't exist or you don't have it.");
+    return;
+  }
+
+  // Use the healing item
+  Inventory[chosen.name]--;
+
+  if (chosen.name === "heart") {
+    alert("The heart absorbs into your blood stream, you feel stronger...");
+    maxhealth += 10;
+    health = maxhealth;
+  } else {
+    // Heal normally, but capped by maxhealth, not 100
+    health = Math.min(maxhealth, health + chosen.amount);
+  }
+
+  updateAllDisplays();
+});
+
+spellBtn.addEventListener("click", () => {
+  spellMenu.style.display =
+    spellMenu.style.display === "none" ? "flex" : "none";
+});
+
+const craftCategories = document.getElementById("craftCategories");
+
+craftBttn.addEventListener("click", () => {
+  const isHidden = craftMenu.style.display === "none" || craftMenu.style.display === "";
+  craftMenu.style.display = isHidden ? "flex" : "none";
+  craftCategories.style.display = isHidden ? "block" : "none";
+});
+
+craftSpearBtn.addEventListener("click", () => craftItem("spear"));
+
+craftDaggerBtn.addEventListener("click", () => craftItem("dagger"));
+
+craftRopeBtn.addEventListener("click", () => craftItem("rope"));
+
+craftBandageBtn.addEventListener("click", () => craftItem("bandage"));
+
+craftMedkitBtn.addEventListener("click", () => craftItem("medkit"));
+
+craftClothBtn.addEventListener("click", () => craftItem("cloth"));
+
+craftAlcoholBtn.addEventListener("click", () => craftItem("alcohol"));
+
+craftRusticStewBtn.addEventListener("click", () => craftItem("rusticStew"));
+
+craftPatchBtn.addEventListener("click", () => craftItem("patch"));
+
+craftHeartBtn.addEventListener("click", () => { 
+  if (Inventory.heart <= 4 && maxhealth <= 1000) {
+craftItem("heart");
+  }
+});
+
+craftFluffSwordBtn.addEventListener("click", () => craftItem("fluffSword"));
+
+craftDarkOrbBtn.addEventListener("click", () => {
+  craftItem("darkOrb");
+
+  if (Inventory.darkOrb >= 4) {
+    alert("A monster is emerging, you have a minute to gear up");
+    Inventory.darkOrb = 0;
+    updateAlldisplays();
+    bossTimer = 60; // reset timer
+
+    const BossInterval = setInterval(() => {
+      bossTimer--;
+
+      if (bossTimer <= 0) {
+        clearInterval(BossInterval);
+        spawnBoss(0); // spawn Eyed Dragon
+        madDragon.play();
+        bossTimer = 60;
+  
+      }
+    }, 1000);
+  }
+});
+
+addCraftHover(craftSpearBtn,"Spear — Wood: 2, Stone: 1, String: 1"
+);
+
+addCraftHover(craftDaggerBtn,"Dagger — Wood: 1, Fang: 3");
+
+addCraftHover(craftRopeBtn,"Rope — String: 5");
+
+addCraftHover(craftBandageBtn,"Bandage — String: 2, Alcohol: 1");
+
+addCraftHover(craftPatchBtn,"Patch — Cloth: 2");
+
+addCraftHover(craftMedkitBtn,"Medkit — Cloth: 3, String: 2, Alcohol: 1");
+
+addCraftHover(craftClothBtn,"Cloth — String: 3");
+
+addCraftHover(craftAlcoholBtn,"Alcohol — Meat: 3, Beef: 1");
+
+addCraftHover(craftRusticStewBtn,"Rustic Stew — Beef: 4, Pork: 4, Meat: 4, Alcohol: 2");
+
+addCraftHover(craftDarkOrbBtn,"Dark Orb — Crystal: 1, Dark Magic Essence: 1");
+
+addCraftHover(craftFluffSwordBtn,"Fluff Sword — Stone: 6, Feather: 4, Wood: 20, Rope: 1");
+
+addCraftHover(craftHeartBtn,"Heart — Stone: 50, Feather: 10, Crystal: 2, Medkit: 3");
+
+
+function addCraftHover(button, text) {
+  button.addEventListener("mouseenter", () => {
+    const rect = button.getBoundingClientRect();
+
+    desc.innerText = text;
+
+    desc.style.left = rect.left + rect.width / 2 + "px";
+    desc.style.top = rect.top + 50 + "px";
+    desc.style.transform = "translate(-50%, -100%)";
+
+    desc.classList.add("show");
+  });
+
+  button.addEventListener("mouseleave", () => {
+    desc.classList.remove("show");
+  });
+}
+
+function performCrystalSpell() {
+  // Requirements
+  if (Inventory.darkMagicEssence < 1) {
+    alert("Not enough Dark Magic Essence.");
+    return;
+  }
+
+  if (Inventory.fang < 2) {
+    alert("Not enough Fangs.");
+    return;
+  }
+
+  if (health <= 20) {
+    alert("You are too weak to perform the spell.");
+    return;
+  }
+
+  // Costs
+  Inventory.darkMagicEssence -= 1;
+  Inventory.fang -= 2;
+  health -= 20;
+
+  // Reward
+  Inventory.crystal++;
+
+  alert("Dark energy condenses into a Crystal...");
+  updateAllDisplays();
+}
+
+// ======= SPELLS ========
+crystalSpellBtn.addEventListener("click", performCrystalSpell);
+
+crystalSpellBtn.addEventListener("mouseenter", () => {
+  desc.innerText = "requires 20 health, 1 dark essence and 2 fangs";
+});
+
+crystalSpellBtn.addEventListener("mouseleave", () => {
+  desc.innerText = "";
+});
+
+// --- Hunger and Health Drain Timers ---
+setInterval(() => {
+  if (hunger > 0 && menuOpened === false) {
+    hunger--;
+  }
+  updateAllDisplays();
+}, 5000);
+
+setInterval(() => {
+  if (hunger === 0 && health > 0) {
+    health--;
+    updateAllDisplays();
+  }
+}, 1000);
+
+/* ======= ANTI-CHEAT ======= */
+document.body.addEventListener("keypress", (e) => {
+  if (e.key === "d") {
+    let askPassword = prompt("Enter password to turn on testing mode");
+    if (askPassword === "3092") {
+    if (testingMode === true) {
+      testingMode = false;
+      alert("Testing mode off")
+    } else {
+      testingMode = true;
+      alert("Testing mode on")
+    }
+    } else {
+      alert("wrong password");
+    }
+  }
+});
+
+// --- Anti-Cheat DevTools Detection ---
+(function() {
+  let devtoolsOpen = false;
+
+  function checkDevTools() {
+    const threshold = 160; // width or height threshold for devtools panel
+    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+    return widthThreshold || heightThreshold;
+  }
+
+  function stopCheat() {
+     let impossible = prompt("please type in a impossible password that not even the dev knows");
+    
+    if (impossible === "jkn3fkwedil30wedns") {
+      alert("you guessed it...");
+      Inventory.beef = 9999999;
+    } else {
+      alert("incorrect")
+      stopCheat();
+    }
+  }
+  
+  function devtoolsChecker() {
+      if (isInIframe) return;
+    
+    if (checkDevTools()) {
+      if (!devtoolsOpen) {
+        devtoolsOpen = true;
+        if (!testingMode) {
+          alert("DevTools detected! CHEATER ALERT");
+          stopCheat();
+        }
+      }
+    } else {
+      devtoolsOpen = false;
+    }
+  }
+
+  setInterval(devtoolsChecker, 1000);
+})();
+
+const craftCategoryButtons = document.querySelectorAll(".craftCatBtn");
+const craftButtons = document.querySelectorAll("#craftMenu button.Citem");
+
+function filterCraftButtons(category) {
+  if (category === "all") {
+    craftButtons.forEach(btn => btn.style.display = "inline-block");
+  } else {
+    craftButtons.forEach(btn => {
+      if (btn.classList.contains(category)) {
+        btn.style.display = "inline-block";
+      } else {
+        btn.style.display = "none";
+      }
+    });
+  }
+}
+
+// Default show all on load
+filterCraftButtons("all");
+
+// Add event listeners to category buttons
+craftCategoryButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const cat = btn.getAttribute("data-cat");
+    filterCraftButtons(cat);
+
+    // Optionally, highlight selected category button
+    craftCategoryButtons.forEach(b => b.style.fontWeight = "normal");
+    btn.style.fontWeight = "bold";
+  });
+});
+
+// --- Start on title screen ---
+showScreen(titleScreen);
+
+//# sourceURL=userscript.js
+</script>
+</body>
+</html>
