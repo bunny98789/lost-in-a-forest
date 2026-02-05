@@ -241,8 +241,60 @@ body {
   background: #0f0;
 }
 
+#puddle {
+   image-rendering = "pixelated";
+   width: 75px;
+  position: fixed;
+  left: 45px;
+  top: 400px;
+  display: none;
+}
+
+#gameMessage {
+  position: fixed;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 9999;
+}
+
+/* Explore cooldown visuals */
+.bttn {
+  position: relative;
+  overflow: hidden;
+}
+
+.bttn.cooldown {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.bttn.cooldown::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  animation: cooldownAnim 2s linear forwards;
+}
+
+@keyframes cooldownAnim {
+  from { width: 100%; }
+  to { width: 0%; }
+}
 </style>
 </head>
+<body>
 <body>
 <!DOCTYPE html>
 <html lang="en">
@@ -250,28 +302,29 @@ body {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Lost in a forest</title>
-  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
+  
 <!-- Title Screen -->
 <div id="titleScreen" class="screen">
   <h1>Lost in a forest</h1>
   <button id="playBtn" class="menu-btn">Play</button>
   <button id="changelogBtn" class="menu-btn">Changelog</button>
    <button id="controlsBtn" class="menu-btn">Controls</button>
-  <div class="version-label">Version 1.3.0</div>
+  <div class="version-label">Version 1.4.0</div>
 </div>
 
 <div id="changelogScreen" class="screen hidden">
   <h2>Changelog</h2>
   <div id="changelogContent">
-    <p class="Ctxt"><strong>1.0.0 (2025-1-24)</strong>: Initial Release</p>
+    <p class="Ctxt"><strong>1.0.0 (2026-1-24)</strong>: Initial Release</p>
     <p class="Ctxt"><strong>1.1.0 (2026-1-24)</strong>: Changed the eating system</p>
     <p class="Ctxt"><strong>1.1.1 (2026-1-24)</strong>: fixed no button glitch</p>
     <p class="Btxt"><strong>1.2.0 (2026-1-26)</strong>: added healing, changed crafting system layout, and added bosses that can be summoned, changed the recipe for the spear so now it needs string as well, and made it so the game doesn't spawn things in while in the menu, also there are now spells ( 1 of which is needed to get to the first boss)</p>
     <p class="Btxt"><strong>1.2.1 (2026-1-26)</strong>: fixed anti-cheat system</p>
-     <p class="Btxt"><strong>1.3.0 (2026-1-28)</strong>: fixed boss battle, added lore, added in [mobName here] and added in new items to go with the new [mobName here], added crafting categories, also there is a new second boss along with a new weapon, and there is also a damage display now, and there is no a special display when you hover over crafting buttons, added in heart</p>
+     <p class="Btxt"><strong>1.3.0 (2026-1-28)</strong>: fixed boss battle, added lore, added in dog and added in new items to go with the new dog, added crafting categories, also there is a new second boss along with a new weapon, and there is also a damage display now, and there is now a special display when you hover over crafting buttons, added in heart</p>
+     <p class="Btxt"><strong>1.4.0 (2026-2-4)</strong>: Adds in a new boss, water orb, water collecting, and water sword, shack (found during exploration, gives iron), and spider which drops string, also added in milking of cows and spiders (ik it's wierd), UI revamp, also there is now a cool down on exploring (sorry)
+</p>
   </div>
   <button id="backFromChangelog" class="menu-btn">Back</button>
 </div>
@@ -280,9 +333,9 @@ body {
   <div id="controlsScreen" class="screen hidden">
   <h2>Controls</h2>
   <div id="controlsContent">
-    <p class="Ctxt"><strong>Right click</strong>: Tames wolf (requires meat)</p>
+    <p class="Ctxt"><strong>Right click</strong>: Tames wolf (requires meat), milks cows and spiders</p>
     <p class="Ctxt"><strong>Left click</strong>: Clicks buttons and attacks creatures</p>
-    <p class="Ctxt"><strong>NOTE</strong>: When the dog flashes white, it means he dealth damage, red means he took damage, this will most likely be changed in the future</p>
+    <p class="Ctxt"><strong>NOTE</strong>: When the dog flashes white, it means he dealt damage, red means he took damage, this will most likely be changed in the future</p>
      <p class="Ctxt"><strong>MORE COMING SOON</strong></p>
   </div>
   <button id="backFromControlScreen" class="menu-btn">Back</button>
@@ -295,7 +348,9 @@ body {
   <audio id="Intro2" src="https://files.catbox.moe/ka8uok.mp3"></audio>
   <audio id="Intro3" src="https://files.catbox.moe/pr98xq.mp3"></audio>
   <audio id="ClickOff" src="https://files.catbox.moe/2pbex5.mp3"></audio>
-  <audio id="madDragon" src="https://files.catbox.moe/pxove5.5&guidanceScale=5"></audio>
+  <audio id="madDragon" src="https://files.catbox.moe/pxove5.5&guidanceScale=5.mp3"></audio>
+  
+  <img id="puddle" src="https://files.catbox.moe/jp8ngt.png">
   
   <!-- Displays Group -->
   <div id="displays" class="group">
@@ -338,6 +393,11 @@ body {
   <button id="craftDarkOrb" class="Citem essential">Make a Dark Orb</button>
     <button id="craftFluffSword" class="Citem weapon">Make a Fluff Sword</button>
      <button id="craftHeart" class="Citem medical">Make a Heart</button>
+     <button id="craftWaterOrb" class="Citem essential">Make a Water Orb</button>
+    <button id="craftSteel" class="Citem essential">Make Steel</button>
+    <button id="craftBucket" class="Citem essential">Make a Bucket</button>
+     <button id="craftWaterSword" class="Citem weapon">Make a water sword</button>
+      <button id="craftString" class="Citem essential">Make string</button>
 </div>
 
   <!-- Inventory Group -->
@@ -357,18 +417,18 @@ body {
 
 <div id="spellMenu" class="group" style="display:none;">
   <button id="crystalSpellBtn" class="Sitem">
-    Perform Crystal Spell
+    Perform Crystal Spell (dark essence 1, 2 fangs, 20 hp)
   </button>
 </div>
-  
+  <div id="gameMessage"></div>
 </div>
-
-<script src="script.js"></script>
+  
 </body>
 </html>
 
+<script>window.addEventListener("DOMContentLoaded", () => { 
 
-<script>const isInIframe = window.self !== window.top;
+const isInIframe = window.self !== window.top;
 
 // --- Title Screen Elements ---
 const titleScreen = document.getElementById("titleScreen");
@@ -416,10 +476,22 @@ const craftPatchBtn = document.getElementById("craftPatch");
 const craftDarkOrbBtn = document.getElementById("craftDarkOrb");
 const craftHeartBtn = document.getElementById("craftHeart");
 const craftFluffSwordBtn = document.getElementById("craftFluffSword");
+const craftWaterOrbBtn = document.getElementById("craftWaterOrb");
+const craftSteelBtn = document.getElementById("craftSteel");
+const craftBucketBtn = document.getElementById("craftBucket");
+const craftWaterSwordBtn = document.getElementById("craftWaterSword");
+const craftStringBtn = document.getElementById("craftString");
 
 const spellBtn = document.getElementById("spellBtn");
 const spellMenu = document.getElementById("spellMenu");
 const crystalSpellBtn = document.getElementById("crystalSpellBtn");
+
+//puddle
+const puddle = document.getElementById("puddle");
+let puddleSpawned = false;
+
+//Game Varibles
+let gameStarted = false;
 
 // --- Admin Varibles ---
 let testingMode = false;
@@ -428,6 +500,7 @@ let password = 3092;
 // --- Game Varibles ---
 let menuOpened = true; 
 let gameStartTime = null;
+let exploreBttnReady = true;
 
 // --- Player Stats ---
 let hunger = 100;
@@ -449,6 +522,7 @@ let animalsKilled = 0;
 let bossTimer = 60;
 const activeBosses = [];
 let boss1defeated = false;
+let boss2defeated = false;
 
 // --- Inventory ---
 const Inventory = {
@@ -472,10 +546,19 @@ const Inventory = {
   darkOrb: 0,
   dragonWing: 0,
   devourerScale: 0,
+  leviathanAntenna: 0,
   flesh: 0,
   feather: 0,
   fluffSword: 0,
   heart: 0,
+  waterBucket: 0,
+  bucket: 0,
+  waterOrb: 0,
+  iron: 0,
+  steel: 0,
+  milkBucket: 0,
+  slikBucket: 0,
+  waterSword: 0,
 };
 
 // --- Food Data ---
@@ -485,7 +568,8 @@ const food = [
   { name: "beef", restoration: 10 },
   { name: "alcohol", restoration: 2},
   { name: "rusticStew", restoration: 100},
-  { name: "flesh", restoration: 5}
+  { name: "flesh", restoration: 5},
+  { name: "milkBucket", restoration: 10},
 ];
 
 // --- Items ---
@@ -500,6 +584,7 @@ const weapons = [
   { name: "spear", DamageBonus: 2 },
   { name: "dagger", DamageBonus: 1 },
   { name: "fluffSword", DamageBonus: 5},
+  { name: "waterSword", DamageBonus: 3},
 ];
 
 // --- Animals ---
@@ -510,12 +595,14 @@ const animals = [
   { name: "bear", health: 25, damage: 3, drop: "fang", amount: 3, src: "https://files.catbox.moe/0ds6h5.png" },
    { name: "Dark Fairy", health: 50, damage: 5, drop: "darkMagicEssence", amount: 1, src: "https://files.catbox.moe/01y98x.gif" },
    { name: "Chicken", health: 3, damage: 0, drop: "feather", amount: 2, src: "https://files.catbox.moe/h6i6yt.png" },
+   { name: "spider", health: 4, damage: 2, drop: "string", amount: 1, src: "https://files.catbox.moe/do69vc.png" },
 ];
 
 // 3 specials, fly, invis, beam
 const bosses = [
   { name: "eyed dragon", health: 100, damage: 20, special: "fly", drop1: "beef", amount1: 20, drop2: "fang", amount2: 20, drop3: "dragonWing", amount3: 1, src: "https://files.catbox.moe/qrabn0.png"},
    { name: "devourer", health: 250, damage: 30, special: "beam", drop1: "fang", amount1: 20, drop2: "flesh", amount2: 30, drop3: "devourerScale", amount3: 1, src: "https://files.catbox.moe/4x6k3d.png"},
+   { name: "leviathan", health: 500, damage: 50, special: "invis", drop1: "rusticStew", amount1: 20, drop2: "medkit", amount2: 5, drop3: "devourerScale", amount3: 1, src: "https://files.catbox.moe/4x6k3d.png"},
 ]
 
 // --- Recipes ---
@@ -531,7 +618,12 @@ const recipes = [
   { name: "rusticStew", cost: { beef: 4, pork: 4, meat: 4, alcohol: 2} },
   { name: "darkOrb", cost: {crystal: 1, darkMagicEssence: 1} },
    { name: "fluffSword", cost: {stone: 6, feather: 4, wood: 20, rope: 1} },
+  { name: "waterSword", cost: {stone: 5, wood: 5, waterBucket: 1,} },
    { name: "heart", cost: {stone: 50, feather: 10, crystal: 2, medkit: 3} },
+  { name: "waterOrb", cost: {stone: 50, wood: 50, waterBucket: 4, crystal: 1} },
+  { name: "steel", cost: {iron: 3} },
+  { name: "bucket", cost: {steel: 5} },
+  { name: "string", cost: {silkBucket: 1}, amount: 5 },
 ];
 
 const healing = [
@@ -540,6 +632,19 @@ const healing = [
   { name: "medkit", amount: 100},
   { name: "heart", amount: 100},
 ]
+
+function showMessage(text, time = 2000) {
+  const box = document.getElementById("gameMessage");
+  if (!box) return;
+
+  box.textContent = text;
+  box.style.opacity = "1";
+
+  clearTimeout(box._hideTimer);
+  box._hideTimer = setTimeout(() => {
+    box.style.opacity = "0";
+  }, time);
+}
 
 function formatItemName(key) {
   return key
@@ -559,6 +664,7 @@ function updateAllDisplays() {
   healthDisplay.innerText = `Health: ${health}`;
   damageDisplay.innerText = `Damage: ${damage}`;
 
+  checkDamage();
   
   let inventoryText = "";
 
@@ -572,11 +678,11 @@ document.getElementById("Items").innerHTML = inventoryText || "Inventory empty, 
 
 
   if (health <= 0) {
-    alert("Game over 💀");
+    showMessage("Game over 💀");
     restartGame();
   }
 }
-
+  
 function restartGame() {
   hunger = 100;
   health = 100;
@@ -620,14 +726,14 @@ function getRandomItem() {
 function craftItem(recipeName) {
   const recipe = recipes.find(r => r.name === recipeName);
   if (!recipe) {
-    alert("Recipe not found!");
+    showMessage("Recipe not found!");
     return;
   }
 
   // Check if player has enough materials
   for (const material in recipe.cost) {
     if (!Inventory[material] || Inventory[material] < recipe.cost[material]) {
-      alert(`Not enough ${material}!`);
+      showMessage(`Not enough ${material}!`);
       return;
     }
   }
@@ -638,7 +744,9 @@ function craftItem(recipeName) {
   }
 
   // Add crafted item
-  Inventory[recipe.name] = (Inventory[recipe.name] || 0) + 1;
+  const amount = recipe.amount ?? 1;
+Inventory[recipe.name] = (Inventory[recipe.name] || 0) + amount;
+
 
   // Increase damage if weapon
   const weapon = weapons.find(w => w.name === recipe.name);
@@ -646,7 +754,7 @@ function craftItem(recipeName) {
     damage += weapon.DamageBonus;
   }
 
- alert(`You crafted a ${formatItemName(recipe.name)}!`);
+ showMessage(`You crafted a ${formatItemName(recipe.name)}!`);
   updateAllDisplays();
 }
 
@@ -654,9 +762,9 @@ function craftItem(recipeName) {
 function checkKilledAnimals() {
   if (animalsKilled >= 100 && boss1defeated === true) {
     animalsKilled = 0;
-    alert("the forest feels the blood of the creatures you killed as it dries on the leafy ground, let it now send it's strongest warrior after you...");
-    alert("THE DEVOURER");
-    alert("it will arrive in 60 secs, prepare as best you can");
+    showMessage("the forest feels the blood of the creatures you killed as it dries on the leafy ground, let it now send it's strongest warrior after you...");
+    showMessage("THE DEVOURER");
+    showMessage("it will arrive in 60 secs, prepare as best you can");
     let boss2interval = setInterval(() => {
      bossTimer--;
       
@@ -668,7 +776,6 @@ function checkKilledAnimals() {
   }
 }
 
-// --- Spawn Animals ---
 // --- Spawn Animals ---
 function spawnAnimal(id) {
   if (currentAnimals >= maxAnimals) return;
@@ -710,7 +817,7 @@ function spawnAnimal(id) {
     Math.max(0, (companion.hp / companion.maxHp) * 100) + "%";
 
   if (companion.hp <= 0) {
-    alert("Your dog was defeated protecting you 💔");
+    showMessage("Your dog was defeated protecting you 💔");
     companion.wrapper.remove();
     companion = null;
   }
@@ -721,13 +828,14 @@ function spawnAnimal(id) {
     updateAllDisplays();
   }, 1000);
 
-  // --- TAME WOLF (RIGHT CLICK) ---
+  // --- RIGHT CLICK FUNCTIONS ---
   wrapper.addEventListener("contextmenu", (e) => {
   e.preventDefault();
 
-  if (a.name !== "wolf") return;
-  if (companion) return alert("You already have a companion.");
-  if (Inventory.meat < 5) return alert("Not enough meat.");
+  if (!["wolf", "cow", "spider"].includes(a.name)) return;
+    if (a.name === "wolf") {
+  if (companion) return showMessage("You already have a companion.");
+  if (Inventory.meat < 5) return showMessage("Not enough meat.");
 
   Inventory.meat -= 5;
   clearInterval(damageInterval);
@@ -751,8 +859,27 @@ function spawnAnimal(id) {
     hpInner
   };
 
-  alert("You tamed the wolf. It will protect you.");
-  updateAllDisplays();
+  showMessage("You tamed the wolf 🐺! It will protect you");
+    }
+    
+    if (a.name === "cow") {
+      if (Inventory.bucket >= 1) {
+        Inventory.bucket--;
+        Inventory.milkBucket++;
+      } else {
+        showMessage("You have nothing to milk the cow with");
+      }
+    }
+    
+    if (a.name === "spider") {
+      if (Inventory.bucket >= 1) {
+        Inventory.bucket--;
+        Inventory.silkBucket++;
+      } else {
+        showMessage("You have nothing to get the spider silk with");
+      }
+    }
+     updateAllDisplays();
 });
 
   // --- COMPANION ATTACK LOOP ---
@@ -912,11 +1039,17 @@ function spawnBoss(id) {
     if (hp <= 0) {
       img.remove();
       clearInterval(damageInterval);
+      bossTimer = 60;
       if (beamInterval) clearInterval(beamInterval);
       playerBlinded = false;
       document.body.classList.remove("blinded");
 
       if (a.name === "eyed dragon") boss1defeated = true;
+
+       if (a.name === "devourer") {
+         thisboss2defeated = true; 
+         showMessage("something stronger watches you...");
+       }
 
       Inventory[a.drop1] += a.amount1;
       Inventory[a.drop2] += a.amount2;
@@ -980,6 +1113,7 @@ playBtn.addEventListener("click", () => {
     Intro3.play();
   });
   
+  gameStarted = true;
   menuOpened = false;
   showScreen(gameScreen);
   startSpawning();
@@ -1005,22 +1139,50 @@ backFromControlScreen.addEventListener("click", () => {
 });
 
 // Game buttons
+const COOLDOWN_TIME = 2000;
+
 exploreBttn.addEventListener("click", () => {
-  const found = getRandomItem();
-  Inventory[found]++;
-  alert(`You found ${found}`);
+  if (!exploreBttnReady) {
+    showMessage("You can't explore yet");
+    return;
+  }
+
+  exploreBttnReady = false;
+  exploreBttn.classList.add("cooldown");
+
+  const chance = Math.random();
+
+  if (chance > 0.1) {
+    const found = getRandomItem();
+    Inventory[found]++;
+    showMessage(`You found ${formatItemName(found)}`);
+  } else {
+    const amount = Math.round(Math.random() * 10);
+    if (amount > 0) {
+      Inventory.iron += amount;
+      showMessage(`You found a shack and recovered ${amount} iron`);
+    } else {
+      showMessage("You found a shack, but it was empty");
+    }
+  }
+
   updateAllDisplays();
+
+  setTimeout(() => {
+    exploreBttnReady = true;
+    exploreBttn.classList.remove("cooldown");
+  }, COOLDOWN_TIME);
 });
 
 eatBttn.addEventListener("click", () => {
   if (hunger >= 100) {
-    alert("You're already full");
+    showMessage("You're already full");
     return;
   }
 
   const availableFood = food.filter(f => Inventory[f.name] > 0);
   if (availableFood.length === 0) {
-    alert("You have no food!");
+    showMessage("You have no food!");
     return;
   }
 
@@ -1032,19 +1194,27 @@ eatBttn.addEventListener("click", () => {
   const input = prompt(msg);
   if (!input) return;
 
-  const foodName = input.trim().toLowerCase();
-  const chosen = availableFood.find(f => f.name === foodName);
+ const foodName = input.trim().toLowerCase();
+const chosen = availableFood.find(
+  f => f.name.toLowerCase() === foodName
+);
 
-  if (!chosen) {
-    alert("That food doesn't exist or you don't have it.");
-    return;
-  }
+if (!chosen) {
+  showMessage("That food doesn't exist or you don't have it.");
+  return;
+}
+
+if (chosen.name.toLowerCase() === "flesh") {
+  health -= 10;
+  showMessage("The flesh seems harmful");
+}
+
+if (chosen.name.toLowerCase() === "milkbucket") {
+  health += 10;
+  Inventory.bucket = (Inventory.bucket || 0) + 1;
+  showMessage("The milk seems to heal magically");
+}
   
-  if (chosen.name === "flesh") {
-    health -= 10;
-    alert("the flesh seems harmful");
-  }
-
   Inventory[chosen.name]--;
   hunger = Math.min(100, hunger + chosen.restoration);
 
@@ -1054,14 +1224,14 @@ eatBttn.addEventListener("click", () => {
 healBttn.addEventListener("click", () => {
   // Check if player is already at max health
   if (health >= maxhealth) {
-    alert("You're already healthy");
+    showMessage("You're already healthy");
     return;
   }
 
   // Check if player has any healing items
   const availableHealing = healing.filter(h => Inventory[h.name] > 0);
   if (availableHealing.length === 0) {
-    alert("You have nothing to heal with!");
+    showMessage("You have nothing to heal with!");
     return;
   }
 
@@ -1078,7 +1248,7 @@ healBttn.addEventListener("click", () => {
   const chosen = availableHealing.find(h => h.name === productName);
 
   if (!chosen) {
-    alert("That health product doesn't exist or you don't have it.");
+    showMessage("That health product doesn't exist or you don't have it.");
     return;
   }
 
@@ -1086,7 +1256,7 @@ healBttn.addEventListener("click", () => {
   Inventory[chosen.name]--;
 
   if (chosen.name === "heart") {
-    alert("The heart absorbs into your blood stream, you feel stronger...");
+    showMessage("The heart absorbs into your blood stream, you feel stronger...");
     maxhealth += 10;
     health = maxhealth;
   } else {
@@ -1136,11 +1306,21 @@ craftItem("heart");
 
 craftFluffSwordBtn.addEventListener("click", () => craftItem("fluffSword"));
 
+craftWaterOrbBtn.addEventListener("click", () => craftItem("waterOrb"));
+
+craftSteelBtn.addEventListener("click", () => craftItem("steel"));
+
+craftBucketBtn.addEventListener("click", () => craftItem("bucket"));
+  
+craftWaterSwordBtn.addEventListener("click", () => craftItem("waterSword"));
+  
+craftStringBtn.addEventListener("click", () => craftItem("string"));
+
 craftDarkOrbBtn.addEventListener("click", () => {
   craftItem("darkOrb");
 
   if (Inventory.darkOrb >= 4) {
-    alert("A monster is emerging, you have a minute to gear up");
+    showMessage("A monster is emerging, you have a minute to gear up");
     Inventory.darkOrb = 0;
     updateAlldisplays();
     bossTimer = 60; // reset timer
@@ -1184,6 +1364,16 @@ addCraftHover(craftFluffSwordBtn,"Fluff Sword — Stone: 6, Feather: 4, Wood: 20
 
 addCraftHover(craftHeartBtn,"Heart — Stone: 50, Feather: 10, Crystal: 2, Medkit: 3");
 
+addCraftHover(craftWaterOrbBtn,"Water Orb — Stone: 50, Wood: 50, Crystal: 1, Water Bucket: 4");
+
+addCraftHover(craftSteelBtn,"Steel — 3 Iron");
+
+addCraftHover(craftBucketBtn,"Bucket — 5 Steel");
+  
+addCraftHover(craftWaterSwordBtn,"Water Sword — 5 Wood, 5 Stone, 1 water bucket");
+
+addCraftHover(craftStringBtn,"3 String — 1 silk bucket");
+
 
 function addCraftHover(button, text) {
   button.addEventListener("mouseenter", () => {
@@ -1206,17 +1396,17 @@ function addCraftHover(button, text) {
 function performCrystalSpell() {
   // Requirements
   if (Inventory.darkMagicEssence < 1) {
-    alert("Not enough Dark Magic Essence.");
+    showMessage("Not enough Dark Magic Essence.");
     return;
   }
 
   if (Inventory.fang < 2) {
-    alert("Not enough Fangs.");
+    showMessage("Not enough Fangs.");
     return;
   }
 
   if (health <= 20) {
-    alert("You are too weak to perform the spell.");
+    showMessage("You are too weak to perform the spell.");
     return;
   }
 
@@ -1228,7 +1418,7 @@ function performCrystalSpell() {
   // Reward
   Inventory.crystal++;
 
-  alert("Dark energy condenses into a Crystal...");
+  showMessage("Your energy condenses into a Crystal...");
   updateAllDisplays();
 }
 
@@ -1265,13 +1455,13 @@ document.body.addEventListener("keypress", (e) => {
     if (askPassword === "3092") {
     if (testingMode === true) {
       testingMode = false;
-      alert("Testing mode off")
+      showMessage("Testing mode off")
     } else {
       testingMode = true;
-      alert("Testing mode on")
+      showMessage("Testing mode on")
     }
     } else {
-      alert("wrong password");
+      showMessage("wrong password");
     }
   }
 });
@@ -1350,8 +1540,95 @@ craftCategoryButtons.forEach(btn => {
   });
 });
 
+document.body.addEventListener("keydown", (e) => {
+ if (e.key !== "/" && e.key !== "?") return;
+  
+  e.preventDefault();
+  
+    const input = prompt("Enter command");
+  if (!input) return;
+  
+  const parts = input.trim().split(" ");
+  const command = parts[0];
+  const arg = parts[1];
+  
+  switch (command) {
+  case "spawn":
+    if (!arg) {
+      showMessage("Usage: spawn <id>");
+      return;
+    }
+      showMessage("Trying to spawn");
+      if (currentAnimals < maxAnimals) {
+    spawnAnimal(Number(arg));
+      } else {
+        showMessage("Cap reached")
+      }
+    break;
+
+  case "killall":
+    activeAnimals.forEach(a => a.img.remove());
+    activeAnimals = [];
+    currentAnimals = 0;
+    break;
+    
+    default: 
+      showMessage("Unknown command");
+  }
+});
+
+//spawn boss 3
+function checkDamage() {
+  if (damage >= 25) {
+    showMessage("From claw and shadow, from tooth and flame,");
+    showMessage("The wild remembers its oldest name.");
+    showMessage("The ground grows still, the air turns thin,");
+    showMessage("For something ancient stirs within.");
+    showMessage("It's lair it leaves, as it starts to breath,");
+    showMessage("The world draws close with every heave");
+    showMessage("Steel your hands and guard your breath,");
+    showMessage("For hunger walks the path of death.");
+    showMessage("The earth now waits, the clock now drums,");
+    showMessage("you have 60 seconds before he comes");
+    spawnBoss(2); //LEVIATHAN
+    return;
+  }
+}
+
+function spawnPuddle() {
+  const spawnChance = Math.random();
+  
+  if (spawnChance >= 0.8) {
+    puddle.style.display = "inline-block";
+    showMessage("A mysterious puddle forms");
+    
+    puddle.addEventListener("click", () => {
+      if (Inventory.bucket >= 1) {
+        Inventory.bucket--;
+        Inventory.waterBucket++;
+        puddle.style.display = "none";
+        puddleSpawned = false;
+        updateAllDisplays();
+      } else {
+        showMessage("you have nothing to collect the water with");
+      }
+    });
+  }
+}
+
+setInterval(() => {
+  if (gameStarted === true && puddleSpawned === false) {
+  spawnPuddle();
+  puddleSpawned = true;
+  }
+}, 5000);
+
+
 // --- Start on title screen ---
 showScreen(titleScreen);
+});
+
+//# sourceURL=userscript.js
 
 //# sourceURL=userscript.js
 </script>
